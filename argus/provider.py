@@ -13,10 +13,10 @@ def api_key():
     """Return the configured Gemini API key or explain how to configure one."""
     import os
 
-    key = os.environ.get("ODYSSEUS_API_KEY") or os.environ.get("GEMINI_API_KEY")
+    key = os.environ.get("ARGUS_API_KEY") or os.environ.get("GEMINI_API_KEY")
     if not key:
         raise RuntimeError(
-            "Set ODYSSEUS_API_KEY (or GEMINI_API_KEY) before calling Gemini."
+            "Set ARGUS_API_KEY (or GEMINI_API_KEY) before calling Gemini."
         )
     return key
 

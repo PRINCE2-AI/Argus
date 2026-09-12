@@ -2,7 +2,7 @@
 
 import random
 
-from odysseus.loop import run
+from argus.loop import run
 
 
 class RollDice:
