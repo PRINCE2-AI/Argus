@@ -1,6 +1,7 @@
 """Day 1: teach provider boundaries, wire formats, and resilient HTTP rules."""
 
 import json
+import os
 import time
 import urllib.error
 import urllib.request
@@ -9,10 +10,26 @@ API_ROOT = "https://generativelanguage.googleapis.com/v1beta/models"
 DEFAULT_MODEL = "gemini-3.1-pro-preview"
 
 
+def _load_env_file():
+    """Load simple KEY=VALUE entries from the repository's private .env file."""
+    env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
+    if not os.path.isfile(env_path):
+        return
+    with open(env_path, encoding="utf-8") as env_file:
+        for line in env_file:
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            name, value = line.split("=", 1)
+            name = name.strip()
+            value = value.strip().strip("\"'")
+            if name and name not in os.environ:
+                os.environ[name] = value
+
+
 def api_key():
     """Return the configured Gemini API key or explain how to configure one."""
-    import os
-
+    _load_env_file()
     key = os.environ.get("ARGUS_API_KEY") or os.environ.get("GEMINI_API_KEY")
     if not key:
         raise RuntimeError(
