@@ -8,7 +8,7 @@ KEEP_RECENT = 6
 
 def estimate_tokens(messages):
     """Estimate token usage from the string representation of messages."""
-    return sum(len(str(message)) for message in messages) // CHARS_PER_TOKEN
+    return sum(len(str(message)) for message in messages) / CHARS_PER_TOKEN
 
 
 def _transcript(messages):
