@@ -2,7 +2,8 @@
 
 > A small, inspectable Python agent harness for real work inside one directory.
 
-Argus is built from Python's standard library only. It connects a language
+Argus is the smallest agent harness: ten core modules, zero runtime
+dependencies, and explicit boundaries that are easy to inspect. It connects a language
 model to a small set of practical tools, keeps the model inside a workspace
 boundary, records durable sessions, and makes safety decisions explicit.
 
@@ -58,11 +59,26 @@ $env:ARGUS_MODEL = "gemini-3.1-flash-lite"
 
 The current module entry point is a Day 5 CLI stub:
 
+Interactive:
+
 ```powershell
-python -m argus
+python -m argus -d . --mode safe
 ```
 
-Run the first demo:
+Headless:
+
+```powershell
+python -m argus -p "Create a status file and verify it" -d .
+```
+
+Resume the newest saved session:
+
+```powershell
+python -m argus --resume -d .
+```
+
+The first form is interactive, the second runs one task and exits, and the
+third resumes durable work. Run the first tool-calling demo with:
 
 ```powershell
 python -m demos.day1_dice
@@ -150,13 +166,39 @@ All filesystem paths are resolved inside the configured workspace. Dangerous
 patterns such as destructive `rm`, `sudo`, filesystem formatting, forced Git
 pushes, and writes to block devices are denied.
 
+## Day-by-day anatomy
+
+| Day | Modules | Focus |
+| --- | --- | --- |
+| 1 | `provider.py`, `loop.py` | Model boundary, tool calls, and turn loop |
+| 2 | `tools.py`, `security.py` | Workspace tools, path jail, and policy |
+| 3 | `context.py`, `memory.py`, `skills.py` | Compaction, durable facts, and skills |
+| 4 | `session.py`, `subagent.py`, `harness.py` | Persistence, crash repair, delegation, composition |
+| 5 | `cli.py`, `fleet.py`, `__main__.py` | CLI front door and parallel job fleet |
+
+## Composition
+
+Add a tool without changing the harness:
+
+```python
+from argus import Harness, tool
+
+@tool("Return a greeting", name="The name to greet")
+def greet(name):
+    """Return a friendly greeting."""
+    return f"Hello, {name}!"
+
+harness = Harness(workdir=".", extra_tools=[greet])
+print(harness.run("Use the greet tool for Ada."))
+```
+
 ## Repository layout
 
 ```text
 argus/
   __init__.py       Public API
   __main__.py       Module entry point
-  cli.py            CLI stub
+  cli.py            Interactive and headless CLI
   context.py        Conversation budgeting and compaction
   harness.py        Main composition layer
   loop.py           Model/tool turn loop
@@ -167,6 +209,7 @@ argus/
   skills.py         Skill discovery and loading
   subagent.py       Bounded child-agent delegation
   tools.py          Workspace tools and path jail
+  fleet.py          Ordered parallel job execution
 demos/
   day1_dice.py      First tool-calling demo
 ```
@@ -190,7 +233,7 @@ out of commits.
 - [x] Day 2 — Workspace tools and safety policy
 - [x] Day 3 — Context compaction, memory, and skills
 - [x] Day 4 — Sessions, crash repair, sub-agents, and harness
-- [ ] Day 5 — Full command-line interface
+- [x] Day 5 — Full command-line interface and parallel fleet
 
 ## License
 
