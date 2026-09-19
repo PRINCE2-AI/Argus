@@ -17,6 +17,7 @@ class Harness:
                  persist=True, _depth=0):
         self.workdir = os.path.realpath(workdir)
         os.makedirs(self.workdir, exist_ok=True)
+        provider._load_env_file()
         self.model = model or os.environ.get("ARGUS_MODEL", provider.DEFAULT_MODEL)
         self.policy = policy or Policy("yolo")
         self.on_event = on_event
