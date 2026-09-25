@@ -14,12 +14,12 @@ class Harness:
     def __init__(self, workdir=".", model=None, policy=None, extra_tools=None,
                  system_extra="", on_event=None, budget_tokens=600_000,
                  max_turns=120, session_path=None, enable_subagents=True,
-                 persist=True, _depth=0):
+                 persist=True, _depth=0, decision_model=None):
         self.workdir = os.path.realpath(workdir)
         os.makedirs(self.workdir, exist_ok=True)
         provider._load_env_file()
         self.model = model or os.environ.get("ARGUS_MODEL", provider.DEFAULT_MODEL)
-        self.policy = policy or Policy("yolo")
+        self.policy = policy or Policy("yolo", decision_model=decision_model)
         self.on_event = on_event
         self.budget_tokens = budget_tokens
         self.max_turns = max_turns
@@ -47,6 +47,7 @@ class Harness:
                     system_extra=system_extra, on_event=self.on_event,
                     budget_tokens=self.budget_tokens, max_turns=self.max_turns,
                     enable_subagents=True, persist=False, _depth=depth,
+                    decision_model=decision_model,
                 )
 
             child_tool = subagent_tool(make_child, _depth, 2)

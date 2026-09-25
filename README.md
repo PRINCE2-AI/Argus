@@ -22,6 +22,7 @@ make every important boundary easy to read, test, and extend.
 - Persist conversations as JSONL under `.argus/sessions`.
 - Repair interrupted tool calls after a process restart.
 - Delegate self-contained work to bounded child agents.
+- Optionally use Jev as a fast, typed decision and safety layer.
 
 ## Quick start
 
@@ -38,6 +39,7 @@ Create `.env` in the repository root:
 
 ```text
 ARGUS_API_KEY=your-gemini-api-key
+JEV_API_KEY=your-jev-api-key
 ```
 
 You can create a Gemini key in [Google AI Studio](https://aistudio.google.com/app/apikey).
@@ -192,6 +194,32 @@ harness = Harness(workdir=".", extra_tools=[greet])
 print(harness.run("Use the greet tool for Ada."))
 ```
 
+## Optional Jev decision layer
+
+Jev is not a text-generation model. It is an optional structured decision
+service that can classify a command as `safe`, `review`, or `dangerous` and
+return a confidence score. Argus keeps its deterministic deny patterns as the
+hard boundary; Jev adds semantic review only when explicitly configured.
+
+```python
+from argus import Harness, Jev
+
+decision_model = Jev()
+harness = Harness(workdir=".", decision_model=decision_model)
+```
+
+Configuration:
+
+```text
+JEV_API_KEY=your-jev-api-key
+JEV_MODEL=jev-latest
+JEV_ENDPOINT=https://api.typesafe.ai/v1/systemone
+```
+
+Jev failures never silently authorize a mutating command. Low-confidence,
+malformed, unavailable, or dangerous decisions require review or are blocked.
+Without `JEV_API_KEY`, Argus behavior remains unchanged.
+
 ## Repository layout
 
 ```text
@@ -210,6 +238,7 @@ argus/
   subagent.py       Bounded child-agent delegation
   tools.py          Workspace tools and path jail
   fleet.py          Ordered parallel job execution
+  jev.py            Optional structured decision client
 demos/
   day1_dice.py      First tool-calling demo
 ```
