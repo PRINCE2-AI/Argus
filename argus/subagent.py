@@ -1,6 +1,6 @@
 """Day 4: teach bounded delegation to fresh Argus sub-agents."""
 
-from .tools import Tool, tool
+from .tools import tool
 
 
 def subagent_tool(make_harness, depth=0, max_depth=2):

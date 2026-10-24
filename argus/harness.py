@@ -1,8 +1,9 @@
-"""Day 4: teach the Argus harness composition, persistence, and delegation."""
+"""Compose providers, tools, policy, memory, skills, sessions, and delegation."""
 
 import os
 
-from . import context, loop, memory, provider, session, skills
+from . import context, loop, memory, session, skills
+from .providers import Provider, get_provider
 from .security import Policy
 from .subagent import subagent_tool
 from .tools import core_tools, tool
@@ -14,17 +15,29 @@ class Harness:
     def __init__(self, workdir=".", model=None, policy=None, extra_tools=None,
                  system_extra="", on_event=None, budget_tokens=600_000,
                  max_turns=120, session_path=None, enable_subagents=True,
-                 persist=True, _depth=0, decision_model=None):
+                 persist=True, _depth=0, decision_model=None, provider=None,
+                 api_key=None, base_url=None):
         self.workdir = os.path.realpath(workdir)
         os.makedirs(self.workdir, exist_ok=True)
-        provider._load_env_file()
-        self.model = model or os.environ.get("ARGUS_MODEL", provider.DEFAULT_MODEL)
-        self.policy = policy or Policy("yolo", decision_model=decision_model)
+        if isinstance(provider, Provider):
+            self.provider = provider
+        else:
+            self.provider = get_provider(
+                provider, model=model, api_key=api_key, base_url=base_url
+            )
+        self.model = self.provider.model
+        self.provider_name = self.provider.name
+        if policy is None:
+            policy = Policy("safe", decision_model=decision_model)
+        elif decision_model is not None:
+            policy.decision_model = decision_model
+        self.policy = policy
         self.on_event = on_event
         self.budget_tokens = budget_tokens
         self.max_turns = max_turns
         self.session_path = session_path
         self.persist = persist
+        self.usage = {"input": 0, "output": 0, "total": 0}
         self.tools = {item.name: item for item in core_tools(self.workdir)}
 
         @tool("Remember a durable fact in project memory", note="The fact to remember")
@@ -43,11 +56,16 @@ class Harness:
         if enable_subagents:
             def make_child(depth):
                 return Harness(
-                    self.workdir, model=self.model, policy=self.policy,
-                    system_extra=system_extra, on_event=self.on_event,
-                    budget_tokens=self.budget_tokens, max_turns=self.max_turns,
-                    enable_subagents=True, persist=False, _depth=depth,
-                    decision_model=decision_model,
+                    self.workdir,
+                    provider=self.provider,
+                    policy=self.policy,
+                    system_extra=system_extra,
+                    on_event=self.on_event,
+                    budget_tokens=self.budget_tokens,
+                    max_turns=self.max_turns,
+                    enable_subagents=True,
+                    persist=False,
+                    _depth=depth,
                 )
 
             child_tool = subagent_tool(make_child, _depth, 2)
@@ -67,7 +85,7 @@ class Harness:
 
     def resume(self, path=None):
         """Load a saved session into this harness."""
-        chosen = path or session.latest(self.workdir)
+        chosen = path or self.session_path or session.latest(self.workdir)
         if not chosen or not os.path.isfile(chosen):
             return False
         loaded = session.load(chosen)
@@ -87,10 +105,6 @@ class Harness:
             session.append(self.session_path, user_message)
         recorded_index = len(self.messages)
 
-        def append_recorded(message):
-            if self.persist:
-                session.append(self.session_path, message)
-
         def record():
             nonlocal recorded_index
             if not self.persist:
@@ -102,29 +116,35 @@ class Harness:
 
         def before_turn(messages):
             nonlocal recorded_index
-            compacted = context.compact(self.model, messages, self.budget_tokens)
+            compacted = context.compact(
+                self.provider, messages, self.budget_tokens
+            )
             if compacted is not messages:
                 messages[:] = compacted
                 if self.persist:
-                    append_recorded(messages[0])
+                    session.append(self.session_path, messages[0])
                 recorded_index = len(messages)
             record()
             return messages
 
         def event(kind, payload):
-            if kind == "assistant":
+            if kind in {"assistant", "tool_end"}:
                 record()
-            elif kind == "tool_end":
-                append_recorded({
-                    "role": "tool",
-                    "name": payload["call"].get("name", ""),
-                    "text": payload["result"],
-                })
+            elif kind == "usage":
+                usage = payload or {}
+                self.usage["input"] += int(usage.get("input", 0) or 0)
+                self.usage["output"] += int(usage.get("output", 0) or 0)
+                self.usage["total"] += int(usage.get("total", 0) or 0)
             if self.on_event:
                 self.on_event(kind, payload)
 
         return loop.run(
-            self.system, self.messages, self.tools, model=self.model,
-            max_turns=self.max_turns, on_event=event,
-            before_tool=self.policy.check, before_turn=before_turn,
+            self.system,
+            self.messages,
+            self.tools,
+            provider=self.provider,
+            max_turns=self.max_turns,
+            on_event=event,
+            before_tool=self.policy.check,
+            before_turn=before_turn,
         )

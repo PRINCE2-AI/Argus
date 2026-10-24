@@ -1,7 +1,8 @@
-"""Day 4: defer module execution to the Argus CLI entry point."""
+"""Module entry point for ``python -m argus``."""
+
+import sys
 
 from .cli import main
 
-
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

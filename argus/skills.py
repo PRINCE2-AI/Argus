@@ -1,8 +1,11 @@
-"""Day 3: teach discoverable workspace skills and explicit skill loading."""
+"""Discoverable workspace skills with explicit, confined loading."""
 
 import os
+import re
 
 SKILLS_DIR = "skills"
+MAX_SKILL_CHARS = 64_000
+_VALID_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 
 
 def _description(text):
@@ -17,21 +20,39 @@ def _description(text):
     return ""
 
 
+def _skill_root(workdir):
+    return os.path.realpath(os.path.join(os.path.realpath(workdir), SKILLS_DIR))
+
+
+def _skill_path(workdir, name):
+    if not isinstance(name, str) or not _VALID_NAME.match(name.strip()):
+        return None
+    root = _skill_root(workdir)
+    path = os.path.realpath(os.path.join(root, name.strip(), "SKILL.md"))
+    try:
+        if os.path.commonpath((root, path)) != root:
+            return None
+    except ValueError:
+        return None
+    return path
+
+
 def catalog(workdir):
     """Return skill names mapped to descriptions and absolute file paths."""
-    root = os.path.join(os.path.realpath(workdir), SKILLS_DIR)
+    root = _skill_root(workdir)
     result = {}
     if not os.path.isdir(root):
         return result
     for name in sorted(os.listdir(root)):
-        path = os.path.join(root, name, "SKILL.md")
-        if os.path.isfile(path):
-            with open(path, encoding="utf-8") as skill_file:
-                text = skill_file.read()
-            result[name] = {
-                "description": _description(text),
-                "path": path,
-            }
+        path = _skill_path(workdir, name)
+        if not path or not os.path.isfile(path):
+            continue
+        with open(path, encoding="utf-8") as skill_file:
+            text = skill_file.read()
+        result[name] = {
+            "description": _description(text)[:200],
+            "path": path,
+        }
     return result
 
 
@@ -47,8 +68,11 @@ def catalog_prompt(workdir):
 
 def read_skill(workdir, name):
     """Read a named skill document or return a clear missing-skill error."""
-    path = os.path.join(os.path.realpath(workdir), SKILLS_DIR, name, "SKILL.md")
-    if not os.path.isfile(path):
+    path = _skill_path(workdir, name)
+    if not path or not os.path.isfile(path):
         return f"Error: no skill named {name}"
     with open(path, encoding="utf-8") as skill_file:
-        return skill_file.read()
+        text = skill_file.read()
+    if len(text) > MAX_SKILL_CHARS:
+        text = text[:MAX_SKILL_CHARS] + "\n... skill truncated ..."
+    return text

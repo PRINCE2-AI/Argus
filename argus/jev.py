@@ -5,6 +5,8 @@ import os
 import urllib.error
 import urllib.request
 
+from .config import load_env_file
+
 DEFAULT_ENDPOINT = "https://api.typesafe.ai/v1/systemone"
 DEFAULT_MODEL = "jev-latest"
 
@@ -17,6 +19,7 @@ class Jev:
     """Call Jev's structured decision endpoint without third-party packages."""
 
     def __init__(self, api_key=None, model=None, endpoint=None, timeout=30):
+        load_env_file()
         self.api_key = api_key or os.environ.get("JEV_API_KEY")
         self.model = model or os.environ.get("JEV_MODEL", DEFAULT_MODEL)
         self.endpoint = endpoint or os.environ.get("JEV_ENDPOINT", DEFAULT_ENDPOINT)

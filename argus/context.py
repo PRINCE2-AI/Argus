@@ -1,9 +1,15 @@
-"""Day 3: teach transcript budgeting, factual compaction, and safe turn history."""
+"""Transcript budgeting, factual compaction, and safe turn history."""
 
-from . import provider
+from .providers import get_provider
 
 CHARS_PER_TOKEN = 4
 KEEP_RECENT = 6
+SUMMARY_MARKER = "[Conversation so far, compacted]"
+SUMMARY_SYSTEM = (
+    "You compress agent transcripts. Preserve: the original task, every file "
+    "created or edited and its purpose, key decisions, unresolved errors, and "
+    "what remains to be done. Be dense and factual."
+)
 
 
 def estimate_tokens(messages):
@@ -26,21 +32,30 @@ def _transcript(messages):
     return "\n".join(lines)
 
 
-def compact(model, messages, budget_tokens):
-    """Compact older transcript messages when the requested budget is exceeded."""
-    if estimate_tokens(messages) <= budget_tokens or len(messages) <= KEEP_RECENT + 1:
+def compact(provider, messages, budget_tokens):
+    """Replace older turns with a dense summary when the budget is exceeded."""
+    if isinstance(provider, str) or provider is None:
+        provider = get_provider(model=provider)
+    if (
+        estimate_tokens(messages) <= budget_tokens
+        or len(messages) <= KEEP_RECENT + 1
+    ):
         return messages
     old = messages[:-KEEP_RECENT]
-    recent = messages[-KEEP_RECENT:]
+    recent = list(messages[-KEEP_RECENT:])
     summary_reply = provider.complete(
-        model,
-        "You compress agent transcripts. Preserve: the original task, every file "
-        "created or edited and its purpose, key decisions, unresolved errors, and "
-        "what remains to be done. Be dense and factual.",
+        SUMMARY_SYSTEM,
         [{"role": "user", "text": _transcript(old)}],
         [],
     )
+    summary = (summary_reply.get("text") or "").strip()
+    if not summary:
+        return messages
     while recent and recent[0].get("role") == "tool":
         recent.pop(0)
-    summary = summary_reply["text"]
-    return [{"role": "user", "text": "[Conversation so far, compacted]\n" + summary}] + recent
+    summary_message = {
+        "role": "user",
+        "text": f"{SUMMARY_MARKER}\n{summary}",
+        "meta": {"compaction": True, "replaced": len(old)},
+    }
+    return [summary_message] + recent
