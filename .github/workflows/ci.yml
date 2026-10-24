@@ -67,7 +67,7 @@ jobs:
           cd "${{ runner.temp }}"
           python -c "import argus; print(argus.__version__)"
           argus --version
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: distributions
           path: dist/*
