@@ -1,0 +1,732 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Documentation — Argus</title>
+  <meta name="description" content="Install Argus, configure a model provider, use the safety modes, resume durable sessions, and extend the Python agent harness.">
+  <meta name="author" content="PRINCE2-AI">
+  <meta name="theme-color" content="#08090c">
+  <link rel="canonical" href="https://argus-harness-oa3gk1gz2f0.qoder.website/docs.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Argus">
+  <meta property="og:url" content="https://argus-harness-oa3gk1gz2f0.qoder.website/docs.html">
+  <meta property="og:title" content="Argus documentation">
+  <meta property="og:description" content="The full reference for the Argus Python agent harness: install, providers, safety, sessions, architecture, CLI, and API.">
+  <meta property="og:image" content="https://argus-harness-oa3gk1gz2f0.qoder.website/assets/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Argus — an agent harness small enough to audit.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Argus documentation">
+  <meta name="twitter:description" content="Install, providers, safety, sessions, architecture, CLI, and Python API for the Argus agent harness.">
+  <meta name="twitter:image" content="https://argus-harness-oa3gk1gz2f0.qoder.website/assets/og.png">
+  <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <script>
+    (function () {
+      document.documentElement.classList.add("js");
+      try {
+        var saved = localStorage.getItem("argus-theme");
+        document.documentElement.dataset.theme = saved === "light" ? "light" : "dark";
+      } catch (error) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header" data-header>
+    <div class="container header-inner">
+      <a class="brand" href="index.html" aria-label="Argus home">
+        <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+          <path d="M3 16c3.6-5.2 7.9-7.8 13-7.8S25.4 10.8 29 16c-3.6 5.2-7.9 7.8-13 7.8S6.6 21.2 3 16Z" fill="none" stroke="currentColor" stroke-width="1.7"/>
+          <circle cx="16" cy="16" r="4.6" fill="none" stroke="currentColor" stroke-width="1.7"/>
+          <circle class="brand-pupil" cx="16" cy="16" r="1.8"/>
+        </svg>
+        <span class="brand-name">Argus</span>
+        <span class="brand-version">0.2</span>
+      </a>
+
+      <nav class="site-nav" id="site-nav" aria-label="Primary">
+        <a href="index.html">Overview</a>
+        <a href="docs.html" aria-current="page">Docs</a>
+        <a href="https://github.com/PRINCE2-AI/Argus" target="_blank" rel="noopener">GitHub
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 11.5 11.5 4.5M6 4.5h5.5V10" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+      </nav>
+
+      <div class="header-actions">
+        <button class="icon-btn theme-toggle" type="button" aria-label="Switch to light theme">
+          <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.2 8.2 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M18.7 5.3l-1.4 1.4M6.7 17.3l-1.4 1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </button>
+        <a class="btn btn-small btn-primary header-cta" href="#install">Get started</a>
+        <button class="icon-btn menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open menu">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="docs-hero">
+      <div class="container">
+        <p class="eyebrow"><span class="pulse-dot" aria-hidden="true"></span> Documentation · v0.2.0</p>
+        <h1>Read the whole<br>request path.</h1>
+        <p class="docs-lede">Install the harness, connect a provider, choose a policy, and keep work alive across restarts. Every behavior described here maps to a module you can open and change.</p>
+        <div class="docs-meta">
+          <span class="tag">Python 3.10+</span>
+          <span class="tag">Zero runtime dependencies</span>
+          <span class="tag">MIT license</span>
+          <span class="tag">Six providers</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="container docs-shell">
+      <aside class="docs-sidebar" aria-label="Documentation navigation">
+        <nav class="docs-nav" aria-label="On this page">
+          <span class="docs-nav-label">Start</span>
+          <a href="#install">Install</a>
+          <a href="#quickstart">Quick start</a>
+          <a href="#providers">Providers</a>
+          <span class="docs-nav-label">Concepts</span>
+          <a href="#safety">Safety model</a>
+          <a href="#sessions">Sessions</a>
+          <a href="#architecture">Architecture</a>
+          <span class="docs-nav-label">Reference</span>
+          <a href="#cli">CLI</a>
+          <a href="#python">Python API</a>
+          <a href="#tools">Tools &amp; skills</a>
+          <a href="#fleet">Fleet</a>
+          <span class="docs-nav-label">Project</span>
+          <a href="#development">Development</a>
+          <a href="#faq">FAQ</a>
+        </nav>
+      </aside>
+
+      <article class="docs-content">
+        <section class="docs-section" id="install" aria-labelledby="install-title">
+          <h2 id="install-title">Install</h2>
+          <p>Argus is a standard Python package with no runtime dependencies. You need Python 3.10 or newer and Git. A virtual environment keeps the command isolated from the rest of your system.</p>
+
+          <ol class="steps">
+            <li>
+              <h3>Check your interpreter</h3>
+              <p>Any supported Python 3.10–3.13 release works.</p>
+              <div class="code-block">
+                <div class="code-head">
+                  <span>terminal</span>
+                  <button class="copy-btn" type="button">Copy</button>
+                </div>
+                <pre><code>python --version</code></pre>
+              </div>
+            </li>
+            <li>
+              <h3>Clone and install</h3>
+              <p>The distribution is named <code>argus-harness</code>; the installed command is <code>argus</code>.</p>
+              <div class="code-block">
+                <div class="code-head">
+                  <span>terminal</span>
+                  <button class="copy-btn" type="button">Copy</button>
+                </div>
+                <pre><code>git clone https://github.com/PRINCE2-AI/Argus.git
+cd Argus
+python -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+pip install -e ".[dev]"</code></pre>
+              </div>
+            </li>
+            <li>
+              <h3>Add one provider key</h3>
+              <p>Copy the example environment file and add a key for the model you want to use. <code>.env</code> is ignored by Git and by the filesystem tools.</p>
+              <div class="code-block">
+                <div class="code-head">
+                  <span>terminal</span>
+                  <button class="copy-btn" type="button">Copy</button>
+                </div>
+                <pre><code>cp .env.example .env             # Windows: copy .env.example .env</code></pre>
+              </div>
+              <div class="code-block">
+                <div class="code-head">
+                  <span>.env</span>
+                  <button class="copy-btn" type="button">Copy</button>
+                </div>
+                <pre><code>GEMINI_API_KEY=your-key-here</code></pre>
+              </div>
+              <p>Argus looks for <code>.env</code> in the current directory first, then in the repository root. Existing environment variables are never overwritten.</p>
+            </li>
+            <li>
+              <h3>Verify the command</h3>
+              <div class="code-block">
+                <div class="code-head">
+                  <span>terminal</span>
+                  <button class="copy-btn" type="button">Copy</button>
+                </div>
+                <pre><code>argus --version
+argus --help</code></pre>
+              </div>
+              <p><code>argus --version</code> prints <code>argus 0.2.0</code>. Use <code>python -m argus</code> anywhere in place of the console script.</p>
+            </li>
+          </ol>
+
+          <div class="callout">
+            <p><strong>Package status.</strong> The project builds and validates the <code>argus-harness</code> sdist and wheel in CI. The release workflow uses PyPI trusted publishing and runs only when a GitHub release is published; until a release is live, install from source.</p>
+          </div>
+
+          <h3>Docker</h3>
+          <p>The repository includes a minimal <code>Dockerfile</code> that installs the package, creates a non-root user, and starts in <code>/workspace</code>. Build it locally and mount the directory you want Argus to work in.</p>
+          <div class="code-block">
+            <div class="code-head">
+              <span>terminal</span>
+              <button class="copy-btn" type="button">Copy</button>
+            </div>
+            <pre><code>docker build -t argus-harness .
+docker run --rm -it -v "$PWD:/workspace" -w /workspace \
+  -e GEMINI_API_KEY argus-harness \
+  --prompt "Map this repository"</code></pre>
+          </div>
+          <p>When a GitHub release is published, the release workflow also builds and pushes the image to <code>ghcr.io/prince2-ai/argus</code>. Container isolation is still your responsibility: the policy is not an operating-system sandbox.</p>
+        </section>
+
+        <section class="docs-section" id="quickstart" aria-labelledby="quickstart-title">
+          <h2 id="quickstart-title">Quick start</h2>
+          <p>Start interactive mode with no arguments. The banner shows the provider, model, workspace, and safety mode.</p>
+          <div class="code-block">
+            <div class="code-head">
+              <span>terminal</span>
+              <button class="copy-btn" type="button">Copy</button>
+            </div>
+            <pre><code>argus</code></pre>
+          </div>
+          <p>For a single task, pass <code>--prompt</code>. Headless <code>safe</code> runs deny mutating tools unless you explicitly pass <code>--yes</code>.</p>
+          <div class="code-block">
+            <div class="code-head">
+              <span>terminal</span>
+              <button class="copy-btn" type="button">Copy</button>
+            </div>
+            <pre><code># Auto-approve within the safe boundary
+argus --workdir ./scratch --yes \
+  --prompt "Create fib.py with an iterative fib(n), run it, and confirm fib(30)"
+
+# Explore without writing or running shell commands
+argus --mode read-only \
+  --prompt "Map this repository and flag risky shell usage"
+
+# Resume the newest durable session
+argus --resume
+
+# See what can be resumed
+argus --list-sessions</code></pre>
+          </div>
+          <p>Inside interactive mode, these slash commands control the running harness:</p>
+          <div class="table-wrap">
+            <table class="docs-table">
+              <thead>
+                <tr><th>Command</th><th>Action</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>/help</code></td><td>Show the interactive command summary</td></tr>
+                <tr><td><code>/mode read-only</code></td><td>Change the policy mode for subsequent turns</td></tr>
+                <tr><td><code>/session</code></td><td>Print the current session file path</td></tr>
+                <tr><td><code>/tokens</code></td><td>Show accumulated input and output usage</td></tr>
+                <tr><td><code>/lang es</code></td><td>Switch the interface language (en, es, hi, fr)</td></tr>
+                <tr><td><code>/exit</code></td><td>Leave interactive mode</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="callout">
+            <p><strong>Approvals happen at the tool boundary.</strong> In interactive <code>safe</code> mode, Argus asks before a mutating call. In a headless run there is no approver, so the call is denied unless <code>--yes</code> is present. Deny patterns and the path jail still apply either way.</p>
+          </div>
+        </section>
+
+        <section class="docs-section" id="providers" aria-labelledby="providers-title">
+          <h2 id="providers-title">Providers</h2>
+          <p>Six adapters share one neutral message format. Explicit selection wins; otherwise Argus infers a provider from <code>ARGUS_PROVIDER</code>, the base URL, or the model name.</p>
+          <div class="table-wrap">
+            <table class="docs-table">
+              <thead>
+                <tr><th>Provider</th><th><code>--provider</code></th><th>Default model</th><th>API key</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Google Gemini</td><td><code>gemini</code></td><td><code>gemini-3.1-pro-preview</code></td><td><code>GEMINI_API_KEY</code></td></tr>
+                <tr><td>Anthropic</td><td><code>anthropic</code></td><td><code>claude-sonnet-4-5</code></td><td><code>ANTHROPIC_API_KEY</code></td></tr>
+                <tr><td>OpenAI</td><td><code>openai</code></td><td><code>gpt-4o-mini</code></td><td><code>OPENAI_API_KEY</code></td></tr>
+                <tr><td>OpenRouter</td><td><code>openrouter</code></td><td><code>openai/gpt-4o-mini</code></td><td><code>OPENROUTER_API_KEY</code></td></tr>
+                <tr><td>Groq</td><td><code>groq</code></td><td><code>llama-3.3-70b-versatile</code></td><td><code>GROQ_API_KEY</code></td></tr>
+                <tr><td>Ollama</td><td><code>ollama</code></td><td><code>llama3.2</code></td><td>none — local</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>Every cloud provider also accepts <code>ARGUS_API_KEY</code> as a shared fallback. Ollama deliberately does not: it reads only <code>OLLAMA_API_KEY</code>, so a cloud key is never sent to localhost.</p>
+
+          <h3>Selection order</h3>
+          <ul>
+            <li><code>--provider</code> selects an adapter explicitly.</li>
+            <li><code>ARGUS_PROVIDER</code> provides the default when the flag is absent.</li>
+            <li>A base URL (flag or <code>ARGUS_BASE_URL</code>) selects the OpenAI-compatible adapter.</li>
+            <li>A <code>claude*</code> model selects Anthropic; <code>gpt*</code>, <code>o1*</code>, <code>o3*</code>, <code>o4*</code>, <code>o5*</code>, and <code>chatgpt*</code> select OpenAI; a model containing <code>/</code> selects OpenRouter; anything else defaults to Gemini.</li>
+          </ul>
+          <p>Model overrides follow the same idea: <code>--model</code> wins, then the provider-specific variable such as <code>ANTHROPIC_MODEL</code>, then <code>ARGUS_MODEL</code>, then the adapter default. Base URLs resolve through <code>--base-url</code>, the provider-specific variable, <code>ARGUS_BASE_URL</code>, and finally the default endpoint.</p>
+
+          <div class="code-block">
+            <div class="code-head">
+              <span>terminal</span>
+              <button class="copy-btn" type="button">Copy</button>
+            </div>
+            <pre><code>argus --provider anthropic --model claude-sonnet-4-5 \
+  --prompt "Review the policy boundary in security.py"
+
+argus --provider openai --model gpt-4o-mini \
+  --prompt "Explain how interrupted tool calls are repaired"
+
+argus --provider ollama --model llama3.2 \
+  --prompt "Summarize this repository"</code></pre>
+          </div>
+
+          <h3>Adapter details that matter</h3>
+          <ul>
+            <li><strong>Gemini.</strong> Thought signatures on tool calls are carried through the neutral format and sent back with the next request.</li>
+            <li><strong>Anthropic.</strong> Tool calls become <code>tool_use</code> blocks and results become <code>tool_result</code> blocks; consecutive results merge into one valid user turn.</li>
+            <li><strong>OpenAI and compatible APIs.</strong> Tool arguments are JSON-encoded at the edge. Reasoning model families switch to <code>max_completion_tokens</code> and omit <code>temperature</code>.</li>
+            <li><strong>All adapters.</strong> HTTP retries are bounded, <code>Retry-After</code> is honored, malformed payloads raise a typed <code>ProviderError</code>, and usage is normalized to input, output, and total tokens.</li>
+          </ul>
+        </section>
+
+        <section class="docs-section" id="safety" aria-labelledby="safety-title">
+          <h2 id="safety-title">Safety model</h2>
+          <p>Safety is a code path, not a sentence in a prompt. Every tool call crosses <code>Policy.check</code> before execution, and every filesystem tool resolves through the same workspace boundary.</p>
+          <div class="table-wrap">
+            <table class="docs-table">
+              <thead>
+                <tr><th>Mode</th><th>Behavior</th><th>Typical use</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>read-only</code></td><td>Only read-oriented tools: <code>read_file</code>, <code>list_files</code>, <code>grep</code>, and <code>use_skill</code>. Shell and writes are denied.</td><td>Repository review, incident inspection</td></tr>
+                <tr><td><code>safe</code> <em>(default)</em></td><td>Mutating tools require an interactive approval. Headless runs deny them unless <code>--yes</code> is passed.</td><td>Normal development</td></tr>
+                <tr><td><code>yolo</code></td><td>Approval prompts are bypassed. Deterministic deny patterns and the path jail still run.</td><td>Trusted, disposable workspaces</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>Layers that apply in every mode</h3>
+          <ul>
+            <li><strong>Path jail.</strong> Filesystem paths are resolved with <code>realpath</code> and must stay inside the workspace. Escapes through <code>..</code> or symlinks fail. Names <code>.env</code>, <code>.env.*</code>, <code>.git</code>, and <code>.argus</code> are protected.</li>
+            <li><strong>Deny patterns.</strong> Shell commands are checked against deterministic rules for root/home deletion, parent traversal, protected directory deletion, privilege escalation, disk formatting, reverse shells, cloud metadata access, pipe-to-shell downloads, force pushes, hard resets, and fork bombs.</li>
+            <li><strong>No silent approval.</strong> The CLI installs an approver only in interactive <code>safe</code> mode. Without one, the policy returns a denial.</li>
+            <li><strong>Secret redaction.</strong> Tool output masks common key formats and environment values whose names look like credentials. Shell subprocesses receive an environment with secret-named variables removed.</li>
+            <li><strong>Bounded operations.</strong> Reads stop at 4,000 lines, grep skips files over 1 MB, shell output is capped, and the default shell timeout is 120 seconds.</li>
+          </ul>
+
+          <div class="callout callout-warn">
+            <p><strong>Argus is not an OS sandbox.</strong> These boundaries reduce accidental damage; they do not isolate hostile code. Run untrusted tasks in a container or virtual machine.</p>
+          </div>
+
+          <h3>Optional semantic review</h3>
+          <p>For deployments that need another check on shell commands, construct a policy with a <code>decision_model</code>. The optional Jev layer classifies commands as safe, review, or dangerous. Low confidence, malformed responses, unavailable service, and dangerous results all fail closed rather than silently authorizing a command.</p>
+          <div class="code-block">
+            <div class="code-head">
+              <span>python</span>
+              <button class="copy-btn" type="button">Copy</button>
+            </div>
+            <pre><code>from argus import Harness, Jev, Policy
+
+policy = Policy("safe", decision_model=Jev())
+harness = Harness(workdir=".", policy=policy)</code></pre>
+          </div>
+          <p>Jev requires <code>JEV_API_KEY</code>. It sends the candidate command to the configured decision endpoint, so do not enable it for workspaces whose commands cannot leave the machine.</p>
+        </section>
+
+        <section class="docs-section" id="sessions" aria-labelledby="sessions-title">
+          <h2 id="sessions-title">Sessions</h2>
+          <p>Every assistant message and tool result is appended to a JSONL file under <code>.argus/sessions/</code> in the workspace. The file is plain text and belongs to that workspace.</p>
+          <div class="code-block">
+            <div class="code-head">
+              <span>terminal</span>
+              <button class="copy-btn" type="button">Copy</button>
+            </div>
+            <pre><code>argus --resume                  # load the newest session
+argus --session PATH            # load a specific file
+argus --list-sessions           # list files with size and a short preview</code></pre>
+          </div>
+
+          <h3>What load repairs</h3>
+          <ul>
+            <li>A torn final line from a crash is ignored instead of failing the entire session.</li>
+            <li>Tool calls interrupted by a missing result receive an explicit error result so the next provider request remains valid.</li>
+            <li>Duplicate adjacent tool rows produced by older versions are removed.</li>
+            <li>The newest compaction marker is restored: the summary plus the recent verbatim turns, with leading orphaned tool messages dropped.</li>
+          </ul>
+
+          <h3>Compaction and limits</h3>
+          <p>When the estimated transcript exceeds the token budget, Argus asks the provider for a dense, factual summary of older turns, keeps the six most recent messages verbatim, and records the summary as a normal user message with <code>meta.compaction</code>. The summary is persisted, so a resumed session reloads the compacted history instead of the original transcript.</p>
+          <p>The default budget is <code>600,000</code> tokens and the default turn limit is <code>120</code>. Both are configurable with <code>--budget-tokens</code> and <code>--max-turns</code>. At the turn limit, Argus requests one final tool-free wrap-up instead of silently stopping mid-task.</p>
+          <div class="callout">
+            <p><strong>Transcripts are not encrypted.</strong> They contain conversation text and tool output after redaction. Keep the workspace and its <code>.argus</code> directory at the same sensitivity as the work being performed.</p>
+          </div>
+        </section>
+
+        <section class="docs-section" id="architecture" aria-labelledby="architecture-title">
+          <h2 id="architecture-title">Architecture</h2>
+          <p>A small composition layer, one turn loop, and named boundaries. The harness wires the pieces together; the loop never learns a provider dialect or a policy's approval rules.</p>
+          <div class="table-wrap">
+            <table class="docs-table">
+              <thead>
+                <tr><th>Module</th><th>Responsibility</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>argus/harness.py</code></td><td>Composes provider, tools, policy, memory, skills, sessions, and sub-agents</td></tr>
+                <tr><td><code>argus/loop.py</code></td><td>Runs turns, executes tools, emits events, and requests a wrap-up at the limit</td></tr>
+                <tr><td><code>argus/providers/</code></td><td>Translates the neutral message format to and from six wire formats</td></tr>
+                <tr><td><code>argus/security.py</code></td><td>Policy modes, deterministic deny patterns, and approval decisions</td></tr>
+                <tr><td><code>argus/tools.py</code></td><td>Confined filesystem tools, bounded shell, redaction, and the tool decorator</td></tr>
+                <tr><td><code>argus/session.py</code></td><td>Append-only JSONL storage, load repair, listing, and latest-session lookup</td></tr>
+                <tr><td><code>argus/context.py</code></td><td>Token estimation and provider-generated compaction</td></tr>
+                <tr><td><code>argus/memory.py</code></td><td>System prompt and durable <code>ARGUS.md</code> project memory</td></tr>
+                <tr><td><code>argus/skills.py</code></td><td>Workspace skill catalog and confined loading</td></tr>
+                <tr><td><code>argus/subagent.py</code></td><td>Bounded delegation to a fresh child context</td></tr>
+                <tr><td><code>argus/fleet.py</code></td><td>Ordered parallel execution of independent jobs</td></tr>
+                <tr><td><code>argus/cli.py</code></td><td>Interactive, headless, session, and fleet entry points</td></tr>
+                <tr><td><code>argus/i18n.py</code></td><td>English, Spanish, Hindi, and French interface strings</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>One turn, step by step</h3>
+          <ol>
+            <li>The harness records the user task and asks the provider for the next assistant message.</li>
+            <li>If the assistant returns tool calls, each call crosses the policy before execution. A denial becomes a tool result instead of an exception.</li>
+            <li>Tool results are appended to the transcript and returned to the provider on the next turn.</li>
+            <li>The loop continues until the assistant returns text without tool calls, the provider fails, or the turn limit is reached.</li>
+            <li>Usage, persistence, and context compaction happen in the harness around the loop, not inside any provider adapter.</li>
+          </ol>
+          <p>Provider adapters implement one method, <code>complete(system, messages, tools)</code>, and return normalized text, tool calls, usage, and a finish reason. A new tool implements a typed callable and is passed through <code>extra_tools</code>; no loop change is required.</p>
+          <p>For the full design rationale, read <a href="https://github.com/PRINCE2-AI/Argus/blob/main/docs/ARCHITECTURE.md" target="_blank" rel="noopener">docs/ARCHITECTURE.md</a>.</p>
+        </section>
+
+        <section class="docs-section" id="cli" aria-labelledby="cli-title">
+          <h2 id="cli-title">CLI reference</h2>
+          <div class="table-wrap">
+            <table class="docs-table">
+              <thead>
+                <tr><th>Flag</th><th>Default</th><th>Purpose</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>-p, --prompt TEXT</code></td><td>interactive</td><td>Run one headless task and exit</td></tr>
+                <tr><td><code>-d, --workdir DIR</code></td><td><code>.</code></td><td>Workspace directory</td></tr>
+                <tr><td><code>-m, --model NAME</code></td><td>provider default</td><td>Override the model</td></tr>
+                <tr><td><code>--provider NAME</code></td><td>inferred</td><td>Select <code>gemini</code>, <code>anthropic</code>, <code>openai</code>, <code>openrouter</code>, <code>groq</code>, or <code>ollama</code></td></tr>
+                <tr><td><code>--base-url URL</code></td><td>provider default</td><td>Override the API endpoint</td></tr>
+                <tr><td><code>--mode MODE</code></td><td><code>safe</code></td><td><code>read-only</code>, <code>safe</code>, or <code>yolo</code></td></tr>
+                <tr><td><code>--yes</code></td><td>off</td><td>Auto-approve mutating tools in <code>safe</code> mode</td></tr>
+                <tr><td><code>--max-turns N</code></td><td><code>120</code></td><td>Maximum model turns per task</td></tr>
+                <tr><td><code>--budget-tokens N</code></td><td><code>600000</code></td><td>Context budget before compaction</td></tr>
+                <tr><td><code>--lang CODE</code></td><td>environment</td><td>Interface language: <code>en</code>, <code>es</code>, <code>hi</code>, <code>fr</code></td></tr>
+                <tr><td><code>--resume</code></td><td>off</td><td>Resume the newest session in the workspace</td></tr>
+                <tr><td><code>--session PATH</code></td><td>—</td><td>Resume a specific session file</td></tr>
+                <tr><td><code>--list-sessions</code></td><td>off</td><td>List saved sessions and exit</td></tr>
+                <tr><td><code>--fleet FILE</code></td><td>—</td><td>Run a JSON fleet file and exit</td></tr>
+                <tr><td><code>--workers N</code></td><td><code>4</code></td><td>Fleet concurrency</td></tr>
+                <tr><td><code>--version</code></td><td>—</td><td>Print the version and exit</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p><code>--resume</code> and <code>--session</code> are mutually exclusive. <code>--fleet</code> cannot be combined with <code>--prompt</code>. The CLI exits non-zero when a provider request fails, a fleet job fails, or the session cannot be loaded.</p>
+          <div class="code-block">
+            <div class="code-head">
+              <span>terminal</span>
+              <button class="copy-btn" type="button">Copy</button>
+            </div>
+            <pre><code># Review while denying every write and shell command
+argus --mode read-only --prompt "Audit the session repair code"
+
+# Auto-approve in safe mode, then resume the same work later
+argus --yes --workdir ./scratch --prompt "Build a small CLI and test it"
+argus --workdir ./scratch --resume</code></pre>
+          </div>
+        </section>
+
+        <section class="docs-section" id="python" aria-labelledby="python-title">
+          <h2 id="python-title">Python API</h2>
+          <p><code>Harness</code> is the composition layer. It accepts a provider name or a provider instance, a policy, extra tools, an event callback, and session options.</p>
+          <div class="code-block">
+            <div class="code-head">
+              <span>python</span>
+              <button class="copy-btn" type="button">Copy</button>
+            </div>
+            <pre><code>from argus import Harness, Policy
+
+harness = Harness(
+    workdir="./scratch",
+    provider="gemini",
+    model="gemini-3.1-flash-lite",
+    policy=Policy("safe"),
+)
+
+print(harness.run("Create a short project status file and verify it."))</code></pre>
+          </div>
+
+          <h3>Resume durable work</h3>
+          <div class="code-block">
+            <div class="code-head">
+              <span>python</span>
+              <button class="copy-btn" type="button">Copy</button>
+            </div>
+            <pre><code>harness = Harness(workdir="./scratch")
+if harness.resume():
+    print(harness.run("Continue the interrupted task."))</code></pre>
+          </div>
+          <p><code>resume(path=None)</code> returns <code>False</code> when no session exists or the chosen file is empty. <code>run(task)</code> returns the assistant's final text. Set <code>persist=False</code> for ephemeral harnesses; sub-agents use that mode.</p>
+
+          <h3>Add a tool</h3>
+          <p>The decorator reads the function signature, builds a provider schema, and returns a tool descriptor. Pass it through <code>extra_tools</code>; the loop does not need to change.</p>
+          <div class="code-block">
+            <div class="code-head">
+              <span>python</span>
+              <button class="copy-btn" type="button">Copy</button>
+            </div>
+            <pre><code>from argus import Harness, tool
+
+@tool("Look up a customer by email", email="Customer email address")
+def find_customer(email):
+    return {"email": email, "plan": "pro"}
+
+harness = Harness(workdir=".", extra_tools=[find_customer])
+print(harness.run("Find ada@example.com and report the plan."))</code></pre>
+          </div>
+
+          <h3>Inject a custom approval policy</h3>
+          <p>The approver receives the call and a reason string. Returning <code>True</code> allows it; anything else keeps the denial. Read-only tools and <code>yolo</code> mode bypass the approver, while deny patterns still run first.</p>
+          <div class="code-block">
+            <div class="code-head">
+              <span>python</span>
+              <button class="copy-btn" type="button">Copy</button>
+            </div>
+            <pre><code>from argus import Harness, Policy
+
+def approve(call, reason):
+    return call.get("name") == "write_file"
+
+policy = Policy("safe", approver=approve)
+harness = Harness(workdir="./scratch", policy=policy)</code></pre>
+          </div>
+
+          <h3>Observe events</h3>
+          <p><code>on_event(kind, payload)</code> receives <code>assistant</code>, <code>tool_start</code>, <code>tool_end</code>, <code>usage</code>, and <code>turn_limit</code>. This is an event hook, not token streaming.</p>
+
+          <h3>Use a custom provider</h3>
+          <p>Subclass <code>Provider</code>, implement <code>complete(system, messages, tools)</code>, and return a dictionary with <code>text</code>, <code>tool_calls</code>, <code>usage</code>, and <code>finish_reason</code>. Register the class in <code>argus/providers/__init__.py</code> or pass an instance as <code>provider=</code>.</p>
+        </section>
+
+        <section class="docs-section" id="tools" aria-labelledby="tools-title">
+          <h2 id="tools-title">Tools &amp; skills</h2>
+          <p>The base harness exposes six workspace tools plus memory and delegation. Every filesystem path passes through the workspace jail.</p>
+          <div class="table-wrap">
+            <table class="docs-table">
+              <thead>
+                <tr><th>Tool</th><th>What it does</th><th>Mode boundary</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>read_file</code></td><td>Read a text file with line numbers; stops at 4,000 lines</td><td>Read-oriented</td></tr>
+                <tr><td><code>list_files</code></td><td>List workspace files by path or basename pattern</td><td>Read-oriented</td></tr>
+                <tr><td><code>grep</code></td><td>Search files with a regular expression</td><td>Read-oriented</td></tr>
+                <tr><td><code>write_file</code></td><td>Write a file atomically, creating parent directories</td><td>Mutating</td></tr>
+                <tr><td><code>edit_file</code></td><td>Replace one unique snippet, or return a precise error</td><td>Mutating</td></tr>
+                <tr><td><code>bash</code></td><td>Run a bounded shell command in the workspace</td><td>Mutating</td></tr>
+                <tr><td><code>remember</code></td><td>Append one durable fact to <code>ARGUS.md</code></td><td>Mutating</td></tr>
+                <tr><td><code>spawn_agent</code></td><td>Delegate a self-contained task to a fresh child context</td><td>Mutating</td></tr>
+                <tr><td><code>use_skill</code></td><td>Load a workspace skill when a catalog exists</td><td>Read-oriented</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>Project memory</h3>
+          <p><code>ARGUS.md</code> in the workspace is injected into the system prompt, capped at 20,000 characters. The <code>remember</code> tool adds a normalized bullet and refuses exact duplicates. Memory is reference data: it cannot override the user's request or the policy.</p>
+
+          <h3>Workspace skills</h3>
+          <p>Create <code>skills/&lt;name&gt;/SKILL.md</code> with optional front matter. When at least one skill exists, the catalog is added to the system prompt and a <code>use_skill</code> tool becomes available. Skill names are validated, resolution is confined to the workspace, and content is capped at 64,000 characters.</p>
+          <div class="code-block">
+            <div class="code-head">
+              <span>skills/release/SKILL.md</span>
+              <button class="copy-btn" type="button">Copy</button>
+            </div>
+            <pre><code>---
+description: Cut and verify a release
+---
+
+1. Run the offline test suite.
+2. Build the sdist and wheel.
+3. Inspect the wheel outside the source tree.</code></pre>
+          </div>
+
+          <h3>Sub-agents</h3>
+          <p>When enabled, <code>spawn_agent</code> creates a child harness with the same provider and policy but a fresh context. Child sessions are not persisted and delegation is capped at two levels. The child returns only its final report, keeping the parent transcript small.</p>
+        </section>
+
+        <section class="docs-section" id="fleet" aria-labelledby="fleet-title">
+          <h2 id="fleet-title">Fleet</h2>
+          <p>A fleet runs independent tasks in parallel while preserving input order in the final report. Each job has its own workspace, so sessions and file writes do not collide.</p>
+          <div class="code-block">
+            <div class="code-head">
+              <span>jobs.json</span>
+              <button class="copy-btn" type="button">Copy</button>
+            </div>
+            <pre><code>{
+  "jobs": [
+    {
+      "name": "docs",
+      "workdir": "./scratch/docs",
+      "task": "Write a README and verify every relative link."
+    },
+    {
+      "name": "api",
+      "workdir": "./scratch/api",
+      "task": "Add request validation and run the tests."
+    }
+  ]
+}</code></pre>
+          </div>
+          <div class="code-block">
+            <div class="code-head">
+              <span>terminal</span>
+              <button class="copy-btn" type="button">Copy</button>
+            </div>
+            <pre><code>argus --fleet jobs.json --workers 2 --yes</code></pre>
+          </div>
+          <p>The file may be a list of jobs or an object with a <code>jobs</code> key. Every job requires <code>name</code>, <code>workdir</code>, and <code>task</code>. A failed job is reported with its exception text and does not cancel the others; the process exits non-zero if any job fails.</p>
+          <p>The Python form returns results in input order, each with <code>name</code>, <code>ok</code>, <code>report</code>, and <code>seconds</code>:</p>
+          <div class="code-block">
+            <div class="code-head">
+              <span>python</span>
+              <button class="copy-btn" type="button">Copy</button>
+            </div>
+            <pre><code>from argus import Harness, run_fleet
+
+jobs = [
+    {"name": "docs", "workdir": "./scratch/docs", "task": "Write a README."},
+    {"name": "api", "workdir": "./scratch/api", "task": "Add validation."},
+]
+
+results = run_fleet(
+    jobs,
+    lambda workdir: Harness(workdir=workdir, persist=False),
+    max_workers=2,
+)</code></pre>
+          </div>
+          <div class="callout">
+            <p><strong>Shared policy, separate workspaces.</strong> The CLI uses one policy for all jobs. Because a fleet is non-interactive, <code>safe</code> mode needs <code>--yes</code> for mutating work, or the jobs will be denied.</p>
+          </div>
+        </section>
+
+        <section class="docs-section" id="development" aria-labelledby="development-title">
+          <h2 id="development-title">Development</h2>
+          <p>Contributions are expected to keep the harness offline-testable and dependency-free at runtime. The test suite uses a scripted provider; it never calls a model or needs a credential.</p>
+          <div class="code-block">
+            <div class="code-head">
+              <span>terminal</span>
+              <button class="copy-btn" type="button">Copy</button>
+            </div>
+            <pre><code>pip install -e ".[dev]"
+python -m unittest discover -s tests -v
+ruff check argus tests
+python -m build
+python -m twine check dist/*</code></pre>
+          </div>
+          <p>The suite currently contains 102 tests covering the loop, policy, path confinement, secret redaction, every provider adapter, session repair, compaction, memory, skills, fleet ordering, and i18n key parity. CI runs the suite on Python 3.10, 3.11, 3.12, and 3.13, with separate lint and packaging jobs.</p>
+
+          <h3>Release path</h3>
+          <ol>
+            <li>Update the version and changelog, run the checks, and publish a GitHub release.</li>
+            <li>The release workflow builds and verifies the sdist and wheel.</li>
+            <li>PyPI trusted publishing uploads the distributions from the <code>pypi</code> environment.</li>
+            <li>The same release builds and pushes the container image to GHCR and attaches the distributions to the release.</li>
+          </ol>
+          <p>Read <a href="https://github.com/PRINCE2-AI/Argus/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">CONTRIBUTING.md</a> before opening a pull request, and report vulnerabilities through the private channel described in <a href="https://github.com/PRINCE2-AI/Argus/blob/main/SECURITY.md" target="_blank" rel="noopener">SECURITY.md</a>.</p>
+        </section>
+
+        <section class="docs-section faq" id="faq" aria-labelledby="faq-title">
+          <h2 id="faq-title">FAQ</h2>
+
+          <details>
+            <summary>Is Argus production-ready?</summary>
+            <p>Argus is at 0.2 and intentionally small. It is suitable for trusted workspaces and teams that value an auditable boundary. It is not an operating-system sandbox, and the public API may still change before 1.0. Run untrusted code in a container or VM.</p>
+          </details>
+          <details>
+            <summary>Does it stream model responses?</summary>
+            <p>No. Version 0.2 requests complete provider responses and exposes turn-level events. Token streaming is not implemented. The event hook is useful for transcripts and logging, but it is not a delta stream.</p>
+          </details>
+          <details>
+            <summary>Does it support MCP tools?</summary>
+            <p>There is no built-in MCP client in 0.2. You can wrap an MCP call in a Python tool and pass it through <code>extra_tools</code>, but that integration is not shipped or covered by the test suite.</p>
+          </details>
+          <details>
+            <summary>Why zero dependencies?</summary>
+            <p>A small dependency surface makes the harness easier to audit, vendor, and embed. Providers use the standard library HTTP client; the CLI, sessions, policy, and tests use only the standard library. Development tools such as ruff and build are optional extras.</p>
+          </details>
+          <details>
+            <summary>Which operating systems are supported?</summary>
+            <p>Anywhere Python 3.10+ runs. The code uses portable standard-library primitives and is developed on Windows; CI currently verifies Linux across Python 3.10–3.13.</p>
+          </details>
+          <details>
+            <summary>How are secrets kept out of the model context?</summary>
+            <p>Protected paths are rejected by the filesystem tools, tool output is redacted, and shell subprocesses receive a sanitized environment. Secrets can still appear in prompts or unredacted content, so do not place credentials in the workspace. Argus is not a secret manager.</p>
+          </details>
+          <details>
+            <summary>What is the license?</summary>
+            <p>MIT. See <a href="https://github.com/PRINCE2-AI/Argus/blob/main/LICENSE" target="_blank" rel="noopener">LICENSE</a>.</p>
+          </details>
+        </section>
+
+        <nav class="docs-pager" aria-label="Documentation pagination">
+          <a href="index.html">
+            <span>Back to</span>
+            Overview
+          </a>
+          <a href="https://github.com/PRINCE2-AI/Argus" target="_blank" rel="noopener">
+            <span>Continue on</span>
+            GitHub ↗
+          </a>
+        </nav>
+      </article>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <a class="brand" href="index.html" aria-label="Argus home">
+          <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+            <path d="M3 16c3.6-5.2 7.9-7.8 13-7.8S25.4 10.8 29 16c-3.6 5.2-7.9 7.8-13 7.8S6.6 21.2 3 16Z" fill="none" stroke="currentColor" stroke-width="1.7"/>
+            <circle cx="16" cy="16" r="4.6" fill="none" stroke="currentColor" stroke-width="1.7"/>
+            <circle class="brand-pupil" cx="16" cy="16" r="1.8"/>
+          </svg>
+          <span class="brand-name">Argus</span>
+        </a>
+        <p>A small, inspectable agent harness for real work inside one directory.</p>
+      </div>
+      <div class="footer-col">
+        <span class="footer-label">Project</span>
+        <a href="docs.html">Documentation</a>
+        <a href="docs.html#architecture">Architecture</a>
+        <a href="https://github.com/PRINCE2-AI/Argus/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Changelog</a>
+      </div>
+      <div class="footer-col">
+        <span class="footer-label">Source</span>
+        <a href="https://github.com/PRINCE2-AI/Argus" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/PRINCE2-AI/Argus/issues" target="_blank" rel="noopener">Issues</a>
+        <a href="https://github.com/PRINCE2-AI/Argus/blob/main/SECURITY.md" target="_blank" rel="noopener">Security</a>
+      </div>
+    </div>
+    <div class="container footer-bottom">
+      <span>© <span data-year>2026</span> Argus contributors</span>
+      <span>MIT · Python 3.10+ · zero runtime dependencies</span>
+    </div>
+  </footer>
+
+  <script src="site.js"></script>
+</body>
+</html>
