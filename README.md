@@ -1,110 +1,152 @@
 # Argus
 
-> A small, inspectable Python agent harness for real work inside one directory.
+**A small, inspectable Python agent harness for real work inside one directory.**
 
-Argus is the smallest agent harness: ten core modules, zero runtime
-dependencies, and explicit boundaries that are easy to inspect. It connects a language
-model to a small set of practical tools, keeps the model inside a workspace
-boundary, records durable sessions, and makes safety decisions explicit.
+[![CI](https://github.com/PRINCE2-AI/Argus/actions/workflows/ci.yml/badge.svg)](https://github.com/PRINCE2-AI/Argus/actions/workflows/ci.yml)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Runtime dependencies: 0](https://img.shields.io/badge/runtime%20dependencies-0-brightgreen.svg)](#design-principles)
 
-The project is being built incrementally as a day-by-day reference
-implementation. The goal is not to hide the agent behind a framework; it is to
-make every important boundary easy to read, test, and extend.
+**English** · [Español](docs/i18n/README.es.md) · [हिन्दी](docs/i18n/README.hi.md) · [Français](docs/i18n/README.fr.md)
 
-## What Argus can do
+Argus connects a language model to a focused set of workspace tools, keeps every
+action inside a path jail, records durable sessions, and turns safety decisions
+into readable code instead of hidden framework behavior. It supports six model
+providers, four interface languages, and ships with no runtime dependencies.
 
-- Call Gemini with a neutral message format and tool calls.
-- Read, write, edit, list, search, and run commands in a confined workspace.
-- Block dangerous shell commands through an explicit policy.
-- Compact long conversations before a model turn.
-- Keep project facts in `ARGUS.md`.
-- Discover optional skills from `skills/<name>/SKILL.md`.
-- Persist conversations as JSONL under `.argus/sessions`.
-- Repair interrupted tool calls after a process restart.
-- Delegate self-contained work to bounded child agents.
-- Optionally use Jev as a fast, typed decision and safety layer.
+It is built for people who want to understand, test, and extend their agent —
+not inherit a black box.
+
+[Live site](https://argus-harness-oa3gk1gz2f0.qoder.website) ·
+[Docs](https://argus-harness-oa3gk1gz2f0.qoder.website/docs.html) ·
+[Architecture](docs/ARCHITECTURE.md) ·
+[Portfolio notes](docs/PORTFOLIO.md)
+
+---
+
+## Why Argus?
+
+Most agent frameworks are large, opaque, and hard to audit. Argus takes the
+opposite approach:
+
+- **Small surface area.** Every boundary — provider, loop, tools, policy,
+  sessions, compaction — is a module you can read in one sitting.
+- **Safety is explicit.** A deterministic deny list, path jail, approval flow,
+  secret redaction, and optional semantic review layer. No silent auto-approval
+  in headless runs.
+- **Sessions survive reality.** Torn JSONL tails, interrupted tool calls, and
+  process restarts are repaired instead of losing work.
+- **Provider-neutral.** Gemini, Anthropic, OpenAI, OpenRouter, Groq, and local
+  Ollama share one neutral message format.
+- **International from day one.** English, Spanish, Hindi, and French CLI
+  strings plus translated READMEs.
+- **Zero runtime dependencies.** Python 3.10+ standard library only.
+
+---
 
 ## Quick start
 
-### 1. Clone and enter the repository
+### Requirements
 
-```powershell
+- Python 3.10 or newer
+- An API key for a cloud provider, or a local [Ollama](https://ollama.com) model
+
+### 1. Install from source
+
+```bash
 git clone https://github.com/PRINCE2-AI/Argus.git
 cd Argus
+python -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+pip install -e ".[dev]"
 ```
 
-### 2. Configure a local API key
+The distribution name is `argus-harness` and the command is `argus`. PyPI
+publishing is wired through trusted publishing and runs only when a GitHub
+Release is published.
 
-Create `.env` in the repository root:
+### 2. Configure a provider
 
-```text
-ARGUS_API_KEY=your-gemini-api-key
-JEV_API_KEY=your-jev-api-key
+```bash
+cp .env.example .env             # Windows: copy .env.example .env
 ```
 
-You can create a Gemini key in [Google AI Studio](https://aistudio.google.com/app/apikey).
-The `.env` file is ignored by Git. Never paste an API key into source code,
-commits, issues, or chat.
+Add one key to `.env`:
 
-Argus also accepts `GEMINI_API_KEY` from the environment.
-
-### 3. Select a model
-
-The default model is defined by the provider. To select another available
-Gemini model, set `ARGUS_MODEL`:
-
-```powershell
-$env:ARGUS_MODEL = "gemini-3.1-flash-lite"
+```dotenv
+GEMINI_API_KEY=your-key-here
 ```
 
-### 4. Run Argus
+`.env` is ignored by Git. Argus loads it from the current directory first, then
+from the repository root, without overwriting variables already present in your
+environment.
 
-The current module entry point is a Day 5 CLI stub:
+### 3. Run a task
 
-Interactive:
+```bash
+# Interactive
+argus
 
-```powershell
-python -m argus -d . --mode safe
+# Headless, auto-approving tool calls in safe mode
+argus --prompt "Create hello.py, run it, and report the output" --yes
+
+# Review-only exploration (no writes, no shell commands)
+argus --prompt "Summarize this repository" --mode read-only
+
+# Resume the newest session
+argus --resume
+
+# List saved sessions
+argus --list-sessions
 ```
 
-Headless:
+Use `python -m argus` anywhere in place of `argus`.
 
-```powershell
-python -m argus -p "Create a status file and verify it" -d .
+---
+
+## Provider support
+
+Argus infers a provider from the model name or `ARGUS_PROVIDER`, and every
+provider can be selected explicitly with `--provider`.
+
+| Provider | `--provider` | Default model | API key environment |
+| --- | --- | --- | --- |
+| Google Gemini | `gemini` | `gemini-3.1-pro-preview` | `GEMINI_API_KEY` or `ARGUS_API_KEY` |
+| Anthropic | `anthropic` | `claude-sonnet-4-5` | `ANTHROPIC_API_KEY` or `ARGUS_API_KEY` |
+| OpenAI | `openai` | `gpt-4o-mini` | `OPENAI_API_KEY` or `ARGUS_API_KEY` |
+| OpenRouter | `openrouter` | `openai/gpt-4o-mini` | `OPENROUTER_API_KEY` or `ARGUS_API_KEY` |
+| Groq | `groq` | `llama-3.3-70b-versatile` | `GROQ_API_KEY` or `ARGUS_API_KEY` |
+| Ollama (local) | `ollama` | `llama3.2` | none |
+
+Override the model with `--model`, `<PROVIDER>_MODEL`, or `ARGUS_MODEL`.
+Override the endpoint with `--base-url`, `<PROVIDER>_BASE_URL`, or
+`ARGUS_BASE_URL`. Ollama deliberately ignores `ARGUS_API_KEY` so a cloud key is
+never sent to localhost.
+
+```bash
+argus --provider anthropic --model claude-sonnet-4-5 --prompt "Review tools.py"
+argus --provider openai --model gpt-4o-mini --prompt "Explain the session repair"
+argus --provider ollama --model llama3.2 --prompt "Summarize this repository"
 ```
 
-Resume the newest saved session:
-
-```powershell
-python -m argus --resume -d .
-```
-
-The first form is interactive, the second runs one task and exits, and the
-third resumes durable work. Run the first tool-calling demo with:
-
-```powershell
-python -m demos.day1_dice
-```
+---
 
 ## Python API
 
 ```python
-from argus import Harness
+from argus import Harness, Policy
 
 harness = Harness(
     workdir=".",
+    provider="gemini",
     model="gemini-3.1-flash-lite",
+    policy=Policy("safe"),
 )
 
-answer = harness.run(
-    "Create a short project status file and verify it."
-)
-print(answer)
+print(harness.run("Create a short project status file and verify it."))
 ```
 
-`Harness` composes the provider, agent loop, tools, policy, context engine,
-memory, skills, sessions, and sub-agents. A session can be resumed after a
-restart:
+Resume durable work after a restart:
 
 ```python
 harness = Harness(workdir=".")
@@ -112,159 +154,261 @@ if harness.resume():
     print(harness.run("Continue the interrupted task."))
 ```
 
-## Workspace memory
-
-Argus stores durable project notes in `ARGUS.md`:
+Inject a provider in tests or custom applications:
 
 ```python
 from argus import Harness
+from argus.providers import get_provider
 
-harness = Harness(workdir=".")
-harness.tools["remember"].run(
-    note="The release codename is Silver Comet."
-)
+provider = get_provider("openai", model="gpt-4o-mini", api_key="test-key")
+harness = Harness(workdir=".", provider=provider)
 ```
 
-The memory is included in the next system prompt, so a fresh conversation can
-use the fact without replaying the old conversation.
+### Add a tool without touching the harness
 
-## Skills
+```python
+from argus import Harness, tool
 
-Create a skill at `skills/brand-voice/SKILL.md`:
+@tool("Look up a customer by email", email="Customer email address")
+def find_customer(email):
+    return {"email": email, "plan": "pro"}
+
+harness = Harness(workdir=".", extra_tools=[find_customer])
+print(harness.run("Find ada@example.com and report her plan."))
+```
+
+### Add a provider
+
+Subclass `Provider`, implement `complete(system, messages, tools)` and return
+normalized text, tool calls, usage, and a finish reason. Register it in
+`argus/providers/__init__.py`. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+---
+
+## Safety model
+
+Every tool call passes through a `Policy` before it runs.
+
+| Mode | Behavior |
+| --- | --- |
+| `read-only` | Only read-oriented tools: `read_file`, `list_files`, `grep`, `use_skill`. |
+| `safe` (default) | Mutating tools require an interactive approval. |
+| `yolo` | Tools run automatically, but deterministic deny patterns still apply. |
+
+The hard boundary is independent of the mode:
+
+- Filesystem tools resolve paths inside the workspace; `..` escapes, symlink
+  escapes, and protected paths (`.env`, `.env.*`, `.git`, `.argus`) are rejected.
+- Shell commands matching destructive patterns are denied: root/home removal,
+  parent-directory traversal, `.git/.argus` deletion, privilege escalation,
+  disk formatting, reverse shells, cloud metadata access, pipe-to-shell
+  downloads, forced Git pushes, hard resets, and fork bombs.
+- Headless runs have no approver. In `safe` mode, mutating tools are denied
+  unless you pass `--yes`; use `--mode yolo` only in a trusted workspace.
+- Tool output is redacted for common key formats and environment-secret values.
+  Subprocesses receive a sanitized environment with secret-named variables
+  removed.
+- Optional Jev semantic review fails closed: low-confidence, malformed,
+  unavailable, or dangerous decisions never silently authorize a command.
+
+> **Argus is not an OS sandbox.** The policy reduces accidental damage; it does
+> not isolate hostile code. Run untrusted tasks in a container or VM.
+
+---
+
+## Architecture
+
+```mermaid
+flowchart LR
+    CLI[CLI / Python API] --> H[Harness]
+    H --> L[Agent loop]
+    L --> P[Provider adapter]
+    P --> M[(Model API)]
+    L --> T[Tool registry]
+    T --> S[Policy]
+    T --> W[Workspace tools]
+    H --> C[Context compaction]
+    H --> DB[(JSONL sessions)]
+    H --> MEM[ARGUS.md memory]
+    H --> SK[Workspace skills]
+    H --> SUB[Bounded sub-agents]
+```
+
+The harness composes the system prompt, tools, policy, memory, skills, and
+session. The loop asks the provider for the next step, runs tool calls, records
+results, and repeats until the model stops or the turn limit is reached. If the
+turn limit is hit, Argus asks the model for one final tool-free wrap-up.
+
+Key design points:
+
+- **Neutral messages.** Providers convert to and from one internal format;
+  Gemini thought signatures and Anthropic content blocks round-trip correctly.
+- **Durable sessions.** JSONL files are appended as work happens. Loading
+  tolerates a torn final line, removes pre-0.2 duplicate tool rows, restores the
+  latest compaction, and inserts explicit error results for tool calls that were
+  interrupted by a crash.
+- **Factual compaction.** Older turns are summarized with a dedicated prompt;
+  recent turns stay verbatim. The summary is marked in the session so a restart
+  reloads only the compacted history.
+- **Atomic writes.** `write_file` and `edit_file` write to a temporary file and
+  atomically replace the target, so a failure cannot leave a half-written file.
+
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full design.
+
+---
+
+## CLI reference
+
+```text
+argus [--prompt TEXT] [--workdir DIR] [--model NAME] [--provider NAME]
+      [--base-url URL] [--mode safe|yolo|read-only] [--yes]
+      [--max-turns N] [--budget-tokens N] [--lang en|es|hi|fr]
+      [--resume | --session PATH] [--list-sessions]
+      [--fleet FILE] [--workers N] [--version]
+```
+
+Interactive commands:
+
+| Command | Purpose |
+| --- | --- |
+| `/help` | Show available commands. |
+| `/mode safe\|yolo\|read-only` | Change the safety mode at runtime. |
+| `/session` | Print the active session file. |
+| `/tokens` | Show accumulated input/output tokens. |
+| `/lang en\|es\|hi\|fr` | Switch the interface language. |
+| `/exit` | Leave the session. |
+
+### Fleet jobs
+
+Run independent tasks in parallel while preserving input order in the report:
+
+```json
+{
+  "jobs": [
+    {"name": "api", "workdir": "./work/api", "task": "Add request validation and tests"},
+    {"name": "docs", "workdir": "./work/docs", "task": "Rewrite the onboarding guide"}
+  ]
+}
+```
+
+```bash
+argus --fleet fleet.json --workers 2 --mode yolo
+```
+
+---
+
+## Internationalization
+
+The CLI is available in English, Spanish, Hindi, and French:
+
+```bash
+argus --lang es
+```
+
+Set `ARGUS_LANG` for a persistent default. Argus also respects `LC_ALL`,
+`LC_MESSAGES`, and `LANG` when they name a supported language. READMEs are
+translated in [docs/i18n](docs/i18n).
+
+---
+
+## Project memory and skills
+
+Durable project facts live in `ARGUS.md`; the model can add them with the
+`remember` tool. Workspace skills live in `skills/<name>/SKILL.md` and are
+listed in the system prompt; the model loads one on demand with `use_skill`.
 
 ```markdown
 ---
-description: Write concise, friendly copy
+description: Write concise, friendly product copy
 ---
 
 Use short sentences and a warm, practical tone.
 ```
 
-Argus discovers the skill and exposes it through the `use_skill` tool when the
-harness starts.
+Memory and skills are treated as reference data, not higher-priority
+instructions, and the system prompt tells the model to ignore conflicting
+directions inside them.
 
-## Safety model
+---
 
-Every tool call passes through a `Policy`:
+## Development
 
-```python
-from argus import Harness, Policy
-
-harness = Harness(
-    workdir=".",
-    policy=Policy("safe"),
-)
+```bash
+python -m unittest discover -s tests -v   # offline, deterministic
+ruff check argus tests
+python -m build
+python -m twine check dist/*
 ```
 
-Available modes:
+The test suite uses a scripted provider, so it never calls a real model or
+requires credentials. CI runs the suite on Python 3.10–3.13, lints the code, and
+builds and installs the wheel outside the source tree.
 
-| Mode | Behavior |
-| --- | --- |
-| `read-only` | Allows only `read_file`, `list_files`, and `grep`. |
-| `safe` | Requests approval for mutating tools. |
-| `yolo` | Allows tools except commands matching deny patterns. |
+Contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) before
+opening a pull request. Please report vulnerabilities privately as described in
+[SECURITY.md](SECURITY.md).
 
-All filesystem paths are resolved inside the configured workspace. Dangerous
-patterns such as destructive `rm`, `sudo`, filesystem formatting, forced Git
-pushes, and writes to block devices are denied.
+---
 
-## Day-by-day anatomy
+## Docker
 
-| Day | Modules | Focus |
-| --- | --- | --- |
-| 1 | `provider.py`, `loop.py` | Model boundary, tool calls, and turn loop |
-| 2 | `tools.py`, `security.py` | Workspace tools, path jail, and policy |
-| 3 | `context.py`, `memory.py`, `skills.py` | Compaction, durable facts, and skills |
-| 4 | `session.py`, `subagent.py`, `harness.py` | Persistence, crash repair, delegation, composition |
-| 5 | `cli.py`, `fleet.py`, `__main__.py` | CLI front door and parallel job fleet |
-
-## Composition
-
-Add a tool without changing the harness:
-
-```python
-from argus import Harness, tool
-
-@tool("Return a greeting", name="The name to greet")
-def greet(name):
-    """Return a friendly greeting."""
-    return f"Hello, {name}!"
-
-harness = Harness(workdir=".", extra_tools=[greet])
-print(harness.run("Use the greet tool for Ada."))
+```bash
+docker build -t argus .
+docker run --rm -it \
+  --user "$(id -u):$(id -g)" \
+  -v "$PWD:/workspace" \
+  -e GEMINI_API_KEY \
+  argus --prompt "Summarize this repository" --mode read-only
 ```
 
-## Optional Jev decision layer
+Published images are built on GitHub Releases and tagged on GHCR
+(`ghcr.io/prince2-ai/argus`).
 
-Jev is not a text-generation model. It is an optional structured decision
-service that can classify a command as `safe`, `review`, or `dangerous` and
-return a confidence score. Argus keeps its deterministic deny patterns as the
-hard boundary; Jev adds semantic review only when explicitly configured.
-
-```python
-from argus import Harness, Jev
-
-decision_model = Jev()
-harness = Harness(workdir=".", decision_model=decision_model)
-```
-
-Configuration:
-
-```text
-JEV_API_KEY=your-jev-api-key
-JEV_MODEL=jev-latest
-JEV_ENDPOINT=https://api.typesafe.ai/v1/systemone
-```
-
-Jev failures never silently authorize a mutating command. Low-confidence,
-malformed, unavailable, or dangerous decisions require review or are blocked.
-Without `JEV_API_KEY`, Argus behavior remains unchanged.
+---
 
 ## Repository layout
 
 ```text
 argus/
-  __init__.py       Public API
-  __main__.py       Module entry point
-  cli.py            Interactive and headless CLI
-  context.py        Conversation budgeting and compaction
-  harness.py        Main composition layer
-  loop.py           Model/tool turn loop
-  memory.py         ARGUS.md project memory
-  provider.py       Gemini HTTP client
-  security.py       Tool policy and deny rules
-  session.py        Durable JSONL sessions and repair
-  skills.py         Skill discovery and loading
-  subagent.py       Bounded child-agent delegation
-  tools.py          Workspace tools and path jail
+  __init__.py       Public API and version
+  __main__.py       python -m argus entry point
+  cli.py            Interactive, headless, session, and fleet modes
+  config.py         .env loading and environment lookup
+  context.py        Token budgeting and factual compaction
   fleet.py          Ordered parallel job execution
-  jev.py            Optional structured decision client
-demos/
-  day1_dice.py      First tool-calling demo
+  harness.py        Composition layer
+  i18n.py           CLI translations and locale resolution
+  jev.py            Optional structured decision layer
+  loop.py           Model/tool turn loop
+  memory.py         ARGUS.md project memory and system prompt
+  security.py       Policy, approvals, and deny patterns
+  session.py        JSONL sessions, compaction restore, crash repair
+  skills.py         Skill discovery and confined loading
+  subagent.py       Bounded child-agent delegation
+  tools.py          Workspace tools, path jail, redaction
+  providers/
+    base.py         Provider contract, HTTP transport, message helpers
+    gemini.py       Gemini adapter
+    openai.py       OpenAI-compatible, OpenRouter, Groq, Ollama
+    anthropic.py    Anthropic Messages adapter
+tests/              Offline unittest suite with a scripted provider
+demos/              Small runnable examples
+docs/               Architecture, portfolio notes, translations
+.github/workflows/  CI and release automation
 ```
 
-## Development
+---
 
-Argus targets Python 3.10+ and has no third-party runtime dependencies.
-Before opening a pull request:
+## Roadmap
 
-```powershell
-python -m py_compile argus/*.py demos/*.py
-git status
-```
+- Streaming provider responses with cancellation.
+- MCP client support behind the same policy boundary.
+- Token-accurate budgeting per provider.
+- Pluggable sandbox backends for untrusted execution.
+- More interface languages.
 
-Keep secrets, `.env`, `.argus/`, `__pycache__/`, and generated workspace files
-out of commits.
-
-## Build progress
-
-- [x] Day 1 — Provider boundary, agent loop, and dice tool
-- [x] Day 2 — Workspace tools and safety policy
-- [x] Day 3 — Context compaction, memory, and skills
-- [x] Day 4 — Sessions, crash repair, sub-agents, and harness
-- [x] Day 5 — Full command-line interface and parallel fleet
+---
 
 ## License
 
-This project is currently under active development. Add the repository's
-chosen license here before publishing a release.
+MIT. See [LICENSE](LICENSE).
