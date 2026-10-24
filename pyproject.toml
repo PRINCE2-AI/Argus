@@ -1,0 +1,66 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "argus-harness"
+dynamic = ["version"]
+description = "A small, inspectable, zero-dependency Python agent harness with durable sessions and explicit safety boundaries."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "PRINCE2-AI" }]
+keywords = [
+  "ai-agents",
+  "anthropic",
+  "gemini",
+  "harness",
+  "llm",
+  "ollama",
+  "openai",
+  "tool-use",
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Topic :: Software Development :: Libraries :: Application Frameworks",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["build>=1.2", "ruff>=0.6", "twine>=5.0"]
+
+[project.scripts]
+argus = "argus.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/PRINCE2-AI/Argus"
+Repository = "https://github.com/PRINCE2-AI/Argus"
+Issues = "https://github.com/PRINCE2-AI/Argus/issues"
+Changelog = "https://github.com/PRINCE2-AI/Argus/blob/main/CHANGELOG.md"
+
+[tool.setuptools.dynamic]
+version = { attr = "argus.__version__" }
+
+[tool.setuptools.packages.find]
+include = ["argus*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["argus"]
