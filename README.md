@@ -3,6 +3,7 @@
 **A small, inspectable Python agent harness for real work inside one directory.**
 
 [![CI](https://github.com/PRINCE2-AI/Argus/actions/workflows/ci.yml/badge.svg)](https://github.com/PRINCE2-AI/Argus/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/argus-harness.svg)](https://pypi.org/project/argus-harness/)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Runtime dependencies: 0](https://img.shields.io/badge/runtime%20dependencies-0-brightgreen.svg)](#design-principles)
@@ -21,6 +22,8 @@ not inherit a black box.
 [Docs](https://argus-harness-oa3gk1gz2f0.qoder.website/docs.html) ·
 [Architecture](docs/ARCHITECTURE.md) ·
 [Portfolio notes](docs/PORTFOLIO.md)
+
+![Argus CLI demo: a local Qwen2.5 model inspects two files and explains the project](docs/assets/argus-demo.gif)
 
 ---
 
@@ -51,7 +54,15 @@ opposite approach:
 - Python 3.10 or newer
 - An API key for a cloud provider, or a local [Ollama](https://ollama.com) model
 
-### 1. Install from source
+### 1. Install
+
+```bash
+pip install argus-harness
+```
+
+The distribution name is `argus-harness`; the command is `argus`.
+
+For development, install from source instead:
 
 ```bash
 git clone https://github.com/PRINCE2-AI/Argus.git
@@ -61,9 +72,8 @@ source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -e ".[dev]"
 ```
 
-The distribution name is `argus-harness` and the command is `argus`. PyPI
-publishing is wired through trusted publishing and runs only when a GitHub
-Release is published.
+Releases are built and published to PyPI through trusted publishing when a
+GitHub Release is published.
 
 ### 2. Configure a provider
 
@@ -353,16 +363,16 @@ opening a pull request. Please report vulnerabilities privately as described in
 ## Docker
 
 ```bash
-docker build -t argus .
 docker run --rm -it \
   --user "$(id -u):$(id -g)" \
   -v "$PWD:/workspace" \
   -e GEMINI_API_KEY \
-  argus --prompt "Summarize this repository" --mode read-only
+  ghcr.io/prince2-ai/argus:latest \
+  --prompt "Summarize this repository" --mode read-only
 ```
 
-Published images are built on GitHub Releases and tagged on GHCR
-(`ghcr.io/prince2-ai/argus`).
+Build locally with `docker build -t argus .`. Tagged images are published to
+GHCR on every GitHub Release (`ghcr.io/prince2-ai/argus`).
 
 ---
 

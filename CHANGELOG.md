@@ -4,7 +4,7 @@ All notable changes to Argus are documented in this file. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
-## [0.2.0] - 2026-10-24
+## [0.2.0] - 2026-10-25
 
 The first public, package-ready release. Argus remains a small harness, but its
 boundaries are now tested and explicit.
