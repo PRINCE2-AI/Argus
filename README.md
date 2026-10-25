@@ -361,6 +361,9 @@ Contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) before
 opening a pull request. Please report vulnerabilities privately as described in
 [SECURITY.md](SECURITY.md).
 
+If Argus is useful to you, starring the repository helps other developers find
+it.
+
 ---
 
 ## Docker
