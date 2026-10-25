@@ -80,10 +80,10 @@ Maintainers release from `main`:
    version with the release date.
 3. Run tests, lint, and `python -m build` locally.
 4. Tag the commit (`vX.Y.Z`) and publish a GitHub Release.
-5. The release workflow builds the sdist/wheel, publishes to PyPI through
-   trusted publishing, publishes the container image to GHCR, and attaches the
-   artifacts to the release.
+5. The release workflow builds the sdist/wheel, attaches them to the release,
+   and publishes the container image to GHCR.
 
-Before the first PyPI release, configure `argus-harness` as a trusted publisher
-on PyPI for this repository, workflow `release.yml`, and environment `pypi`.
-No long-lived PyPI token belongs in repository secrets.
+PyPI publishing is not configured yet. If it is added later, configure
+`argus-harness` as a trusted publisher on PyPI for this repository, workflow
+`release.yml`, and environment `pypi`. No long-lived PyPI token belongs in
+repository secrets.

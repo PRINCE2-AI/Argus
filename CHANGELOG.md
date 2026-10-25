@@ -23,8 +23,8 @@ boundaries are now tested and explicit.
 - `pyproject.toml`, console script `argus`, `argus-harness` distribution
   metadata, and standard-library typing throughout.
 - GitHub Actions CI across Python 3.10–3.13 with lint and distribution checks.
-- Release workflow with PyPI trusted publishing, GHCR container publishing, and
-  release artifact attachment.
+- Release workflow that builds and verifies the sdist/wheel, publishes the GHCR
+  container image, and attaches the distributions to the GitHub release.
 - Dockerfile and `.dockerignore`.
 - `--list-sessions`, `--session`, `--provider`, `--base-url`, `--lang`,
   `--max-turns`, `--budget-tokens`, `--workers`, and `--version` CLI options.

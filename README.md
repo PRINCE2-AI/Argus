@@ -3,7 +3,7 @@
 **A small, inspectable Python agent harness for real work inside one directory.**
 
 [![CI](https://github.com/PRINCE2-AI/Argus/actions/workflows/ci.yml/badge.svg)](https://github.com/PRINCE2-AI/Argus/actions/workflows/ci.yml)
-[![PyPI](https://img.shields.io/pypi/v/argus-harness.svg)](https://pypi.org/project/argus-harness/)
+[![Container](https://img.shields.io/badge/container-ghcr.io-blue?logo=docker)](https://github.com/PRINCE2-AI/Argus/pkgs/container/argus)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Runtime dependencies: 0](https://img.shields.io/badge/runtime%20dependencies-0-brightgreen.svg)](#design-principles)
@@ -56,24 +56,27 @@ opposite approach:
 
 ### 1. Install
 
-```bash
-pip install argus-harness
-```
-
-The distribution name is `argus-harness`; the command is `argus`.
-
-For development, install from source instead:
+Argus is not on PyPI yet. Install from source:
 
 ```bash
 git clone https://github.com/PRINCE2-AI/Argus.git
 cd Argus
 python -m venv .venv
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
-pip install -e ".[dev]"
+pip install .
 ```
 
-Releases are built and published to PyPI through trusted publishing when a
-GitHub Release is published.
+The distribution name is `argus-harness`; the command is `argus`. For
+development, use `pip install -e ".[dev]"` instead.
+
+Or pull the container image:
+
+```bash
+docker pull ghcr.io/prince2-ai/argus:latest
+```
+
+Each GitHub release builds and verifies the wheel and sdist, publishes the GHCR
+image, and attaches the distributions to the release.
 
 ### 2. Configure a provider
 

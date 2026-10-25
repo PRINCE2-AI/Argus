@@ -175,7 +175,7 @@ argus --help</code></pre>
           </ol>
 
           <div class="callout">
-            <p><strong>Package status.</strong> The project builds and validates the <code>argus-harness</code> sdist and wheel in CI. The release workflow uses PyPI trusted publishing and runs only when a GitHub release is published; until a release is live, install from source.</p>
+            <p><strong>Package status.</strong> The project builds and validates the <code>argus-harness</code> sdist and wheel in CI. PyPI publishing is not configured yet, so install from source or use the container image. Each GitHub release attaches the wheel and sdist to the release.</p>
           </div>
 
           <h3>Docker</h3>
@@ -642,8 +642,8 @@ python -m twine check dist/*</code></pre>
           <ol>
             <li>Update the version and changelog, run the checks, and publish a GitHub release.</li>
             <li>The release workflow builds and verifies the sdist and wheel.</li>
-            <li>PyPI trusted publishing uploads the distributions from the <code>pypi</code> environment.</li>
-            <li>The same release builds and pushes the container image to GHCR and attaches the distributions to the release.</li>
+            <li>The workflow attaches the sdist and wheel to the GitHub release.</li>
+            <li>The same release builds and pushes the container image to GHCR.</li>
           </ol>
           <p>Read <a href="https://github.com/PRINCE2-AI/Argus/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">CONTRIBUTING.md</a> before opening a pull request, and report vulnerabilities through the private channel described in <a href="https://github.com/PRINCE2-AI/Argus/blob/main/SECURITY.md" target="_blank" rel="noopener">SECURITY.md</a>.</p>
         </section>

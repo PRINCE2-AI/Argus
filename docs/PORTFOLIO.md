@@ -13,7 +13,7 @@ interviews. The emphasis is on decisions and evidence, not feature lists.
 
 Built a zero-dependency Python AI agent harness that unifies six model providers
 behind durable sessions and a layered safety policy, with offline tests, CI, and
-container and PyPI release pipelines.
+container and release-artifact pipelines.
 
 ## Resume bullets
 
@@ -32,9 +32,9 @@ Pick three or four based on the role.
   subprocess environments, and fail-closed semantic review; added regression
   tests for parent-directory escapes and protected-file access.
 - **Shipped a production-style open-source workflow**: Python 3.10–3.13 CI
-  matrix, linting, wheel/sdist validation and install smoke tests, PyPI trusted
-  publishing, GHCR container release, security and contribution policies, and
-  documentation translated into Spanish, Hindi, and French.
+  matrix, linting, wheel/sdist validation and install smoke tests, GHCR
+  container release, attached release artifacts, security and contribution
+  policies, and documentation translated into Spanish, Hindi, and French.
 - **Internationalized the product** with English, Spanish, Hindi, and French CLI
   strings, locale detection, translated READMEs, and key-parity tests across all
   language dictionaries.
@@ -52,7 +52,7 @@ Pick three or four based on the role.
 | Session format | Append-only JSONL with repair on load |
 | Safety modes | `read-only`, `safe` (default), `yolo` |
 | Packaging | `argus-harness` wheel/sdist, `argus` console script |
-| Delivery | GitHub Actions, PyPI trusted publishing, GHCR image |
+| Delivery | GitHub Actions, GHCR image, attached release artifacts |
 
 ## What makes the project technically interesting
 
@@ -107,8 +107,8 @@ The repository is set up the way a maintained project should be:
 
 - CI on four Python versions, plus lint and package jobs.
 - A wheel installed outside the source tree and smoke-tested in CI.
-- PyPI trusted publishing with no long-lived token.
 - Container publishing to GHCR on release.
+- Wheel and sdist attached to each tagged GitHub release.
 - `CONTRIBUTING`, `SECURITY`, `CODE_OF_CONDUCT`, `CHANGELOG`, `.env.example`.
 - Tests that are deterministic, offline, and credential-free.
 
@@ -207,7 +207,7 @@ writing.
 - **Experience:** a bullet about designing a safety boundary for
   model-generated tool execution and backing it with regression tests.
 - **Skills:** Python, LLM tool calling, agent architecture, GitHub Actions,
-  Docker, PyPI packaging, i18n.
+  Docker, Python packaging, i18n.
 
 Avoid claiming production users or scale that the project does not have. The
 strength here is depth, correctness, and delivery discipline.
