@@ -21,7 +21,8 @@ not inherit a black box.
 [Live site](https://argus-harness-oa3gk1gz2f0.qoder.website) ·
 [Docs](https://argus-harness-oa3gk1gz2f0.qoder.website/docs.html) ·
 [Architecture](docs/ARCHITECTURE.md) ·
-[Portfolio notes](docs/PORTFOLIO.md)
+[Portfolio notes](docs/PORTFOLIO.md) ·
+[Newsletter](https://thereliableagent.substack.com)
 
 ![Argus CLI demo: a local Qwen2.5 model inspects two files and explains the project](docs/assets/argus-demo.gif)
 
@@ -422,6 +423,21 @@ docs/               Architecture, portfolio notes, translations
 - Token-accurate budgeting per provider.
 - Pluggable sandbox backends for untrusted execution.
 - More interface languages.
+
+---
+
+## Following the work
+
+Argus is built in public, and the harder lessons end up in **The Reliable Agent**
+— a newsletter about production systems engineering for AI agents: evals,
+MCP security, durable execution, and the failure modes that only appear once a
+demo meets real work.
+
+- [What 102 tests taught me about agent reliability](https://thereliableagent.substack.com/p/what-102-tests-taught-me-about-agent) — the test suite in this repository, and the four bugs it was written to catch.
+- [Subscribe](https://thereliableagent.substack.com) — free posts on agent reliability; the paid tier adds runnable failure cases, eval harnesses, and teardowns.
+
+No hot takes, no framework-of-the-week. If a claim is made, the code behind it is
+in the post.
 
 ---
 
