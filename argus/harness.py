@@ -122,7 +122,8 @@ class Harness:
             if compacted is not messages:
                 messages[:] = compacted
                 if self.persist:
-                    session.append(self.session_path, messages[0])
+                    for message in messages:
+                        session.append(self.session_path, message)
                 recorded_index = len(messages)
             record()
             return messages

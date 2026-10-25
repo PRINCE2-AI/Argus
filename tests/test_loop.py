@@ -53,6 +53,23 @@ class LoopTests(unittest.TestCase):
         loop.run("system", messages, self.tools, provider=provider)
         self.assertTrue(messages[2]["text"].startswith("ERROR: unknown tool"))
 
+    def test_tool_results_are_redacted_in_history_and_events(self):
+        secret = "sk-abcdefghijklmnop1234"
+        provider = ScriptedProvider([
+            reply("", [tool_call("echo", {"text": secret}, "c1")]),
+            reply("done"),
+        ])
+        messages = [{"role": "user", "text": "go"}]
+        events = []
+        loop.run(
+            "system", messages, self.tools, provider=provider,
+            on_event=lambda kind, payload: events.append((kind, payload)),
+        )
+        self.assertNotIn(secret, messages[2]["text"])
+        self.assertIn("[REDACTED_OPENAI_KEY]", messages[2]["text"])
+        tool_end = next(payload for kind, payload in events if kind == "tool_end")
+        self.assertNotIn(secret, tool_end["result"])
+
     def test_tool_exception_is_contained(self):
         provider = ScriptedProvider([
             reply("", [tool_call("boom", {}, "c1")]),

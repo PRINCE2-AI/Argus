@@ -1,6 +1,7 @@
 """The agent turn loop with explicit tool-error containment."""
 
 from .providers import Provider, ensure_call_ids, get_provider
+from .tools import redact
 
 
 def run(
@@ -63,6 +64,7 @@ def run(
                         result = str(tool.run(**args))
                     except Exception as error:
                         result = f"ERROR: {type(error).__name__}: {error}"
+            result = redact(result)
             messages.append(
                 {
                     "role": "tool",

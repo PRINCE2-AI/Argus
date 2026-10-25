@@ -106,6 +106,58 @@ class HarnessTests(unittest.TestCase):
         self.assertTrue((resumed.messages[0].get("meta") or {}).get("compaction"))
         self.assertEqual(harness.usage, {"input": 2, "output": 2, "total": 4})
 
+    def test_compaction_restores_retained_turns_on_resume(self):
+        provider = ScriptedProvider([
+            reply("", [tool_call("read_file", {"path": "note.txt"}, "c1")]),
+            reply("", [tool_call("read_file", {"path": "note.txt"}, "c2")]),
+            reply("compressed facts"),
+            reply("finished"),
+        ])
+        harness = Harness(
+            self.root, provider=provider, policy=Policy("yolo"),
+            budget_tokens=1,
+        )
+        with mock.patch.object(context, "KEEP_RECENT", 3):
+            self.assertEqual(harness.run("long task"), "finished")
+
+        resumed = Harness(self.root, provider=ScriptedProvider(), persist=False)
+        self.assertTrue(resumed.resume(harness.session_path))
+        self.assertTrue((resumed.messages[0].get("meta") or {}).get("compaction"))
+        assistant_calls = [
+            call
+            for message in resumed.messages
+            if message.get("role") == "assistant"
+            for call in message.get("tool_calls") or []
+        ]
+        tool_rows = [
+            message for message in resumed.messages if message.get("role") == "tool"
+        ]
+        self.assertEqual([call["id"] for call in assistant_calls], ["c2"])
+        self.assertEqual([message["call_id"] for message in tool_rows], ["c2"])
+        self.assertEqual(resumed.messages[-1]["text"], "finished")
+
+    def test_use_skill_output_is_redacted_before_persistence(self):
+        secret = "sk-abcdefghijklmnop1234"
+        skill_dir = os.path.join(self.root, "skills", "demo")
+        os.makedirs(skill_dir)
+        with open(os.path.join(skill_dir, "SKILL.md"), "w", encoding="utf-8") as stream:
+            stream.write(f"---\ndescription: Demo skill\n---\nUse {secret}.\n")
+        provider = ScriptedProvider([
+            reply("", [tool_call("use_skill", {"name": "demo"}, "c1")]),
+            reply("done"),
+        ])
+        harness = Harness(self.root, provider=provider, policy=Policy("yolo"))
+        harness.run("load the demo skill")
+
+        tool_message = next(
+            message for message in harness.messages if message.get("role") == "tool"
+        )
+        self.assertIn("[REDACTED_OPENAI_KEY]", tool_message["text"])
+        with open(harness.session_path, encoding="utf-8") as stream:
+            persisted = stream.read()
+        self.assertNotIn(secret, persisted)
+        self.assertIn("[REDACTED_OPENAI_KEY]", persisted)
+
     def test_remember_tool_writes_and_dedupes(self):
         harness = Harness(
             self.root, provider=ScriptedProvider(), persist=False
