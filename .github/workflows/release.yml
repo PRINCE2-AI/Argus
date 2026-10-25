@@ -75,4 +75,4 @@ jobs:
       - name: Upload sdist and wheel
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload "${{ github.ref_name }}" dist/* --clobber
+        run: gh release upload "${{ github.ref_name }}" dist/* --clobber -R "${{ github.repository }}"
