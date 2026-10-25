@@ -434,6 +434,8 @@ MCP security, durable execution, and the failure modes that only appear once a
 demo meets real work.
 
 - [What 102 tests taught me about agent reliability](https://thereliableagent.substack.com/p/what-102-tests-taught-me-about-agent) — the test suite in this repository, and the four bugs it was written to catch.
+- [The MCP rug pull](https://thereliableagent.substack.com/p/the-mcp-rug-pull-your-approved-tool) — why an approved tool server can change after trust, and how to pin it.
+- [Why your agent eval passes locally and fails in production](https://thereliableagent.substack.com/p/why-your-agent-eval-passes-locally) — the metrics that measure your code ran instead of your agent behaving.
 - [Subscribe](https://thereliableagent.substack.com) — free posts on agent reliability; the paid tier adds runnable failure cases, eval harnesses, and teardowns.
 
 No hot takes, no framework-of-the-week. If a claim is made, the code behind it is
